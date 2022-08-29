@@ -2,7 +2,6 @@ package transaction
 
 import (
 	"bytes"
-	"crypto/ecdsa"
 	"crypto/sha256"
 	"go-blockchain/keys"
 	"strconv"
@@ -15,7 +14,7 @@ type TransactionOutput struct {
 	ParentTransactionId string
 }
 
-func (to *TransactionOutput) Create(recipient keys.PublicKey, value float64, parentTransactionId string) {
+func CreateTransactionOutput(recipient keys.PublicKey, value float64, parentTransactionId string) (to TransactionOutput) {
 	to.Recipient = recipient
 	to.Value = value
 	to.ParentTransactionId = parentTransactionId
@@ -24,8 +23,10 @@ func (to *TransactionOutput) Create(recipient keys.PublicKey, value float64, par
 	hash := sha256.Sum256(id)
 
 	to.Id = string(hash[:])
+
+	return
 }
 
-func (to *TransactionOutput) IsMine(publicKey ecdsa.PublicKey) bool {
+func (to *TransactionOutput) IsMine(publicKey keys.PublicKey) bool {
 	return publicKey.Equal(to.Recipient)
 }
