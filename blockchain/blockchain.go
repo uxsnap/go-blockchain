@@ -1,10 +1,10 @@
 package blockchain
 
 import (
-	"bytes"
 	"go-blockchain/block"
 	"go-blockchain/transaction"
 	"log"
+	"strings"
 )
 
 type Blockchain struct {
@@ -54,15 +54,15 @@ func isValid(b *Blockchain, curBlockIndex, prevBlockIndex int) bool {
 
 	tempUTXOs := make(map[string]transaction.TransactionOutput)
 
-	if !bytes.Equal(curBlock.GetHash(), curBlock.GenerateHash()) {
+	if curBlock.GetHash() != curBlock.GenerateHash() {
 		return false
 	}
 
-	if !bytes.Equal(curBlock.GetPrevHash(), prevBlock.GetHash()) {
+	if curBlock.GetPrevHash() != prevBlock.GetHash() {
 		return false
 	}
 
-	if target := bytes.Repeat([]byte{0}, b.Difficulty); !bytes.Equal(curBlock.GetHash()[0:b.Difficulty], target) {
+	if target := strings.Repeat("0", b.Difficulty); curBlock.GetHash()[0:b.Difficulty] != target {
 		return false
 	}
 
@@ -112,19 +112,20 @@ func isValid(b *Blockchain, curBlockIndex, prevBlockIndex int) bool {
 }
 
 func (b *Blockchain) AddTransaction(bk *block.Block, t transaction.Transaction) bool {
-	if t.TransactionId == "" {
+	if t.Value == 0 {
 		return false
 	}
 
-	if !bytes.Equal(bk.GetPrevHash(), []byte("root")) && !b.ProcessTransaction(t) {
-		log.Println("Transaction failed to process.")
+	if bk.GetPrevHash() != "root" {
+		if !b.ProcessTransaction(t) {
+			log.Println("Transaction failed to process.")
 
-		return false
+			return false
+		}
 	}
 
 	bk.Transactions = append(bk.Transactions, t)
 
-	log.Println("Transaction successfuly added to Block")
 	return true
 }
 
@@ -134,7 +135,11 @@ func (b *Blockchain) ProcessTransaction(t transaction.Transaction) bool {
 		return false
 	}
 
+	log.Print("Inputs:")
+	log.Println(t.Inputs)
+
 	for _, input := range t.Inputs {
+
 		if input == (transaction.TransactionInput{}) {
 			continue
 		}

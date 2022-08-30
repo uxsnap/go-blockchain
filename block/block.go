@@ -1,58 +1,53 @@
 package block
 
 import (
-	"bytes"
 	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"go-blockchain/transaction"
 	"strconv"
+	"strings"
 	"time"
 )
 
 type Block struct {
-	PrevHash     []byte
-	Hash         []byte
+	PrevHash     string
+	Hash         string
 	Timestamp    int
 	Nonce        int
 	Transactions []transaction.Transaction
 }
 
-func convertIntToBytes(data int) []byte {
-	return []byte(strconv.Itoa(data))
-}
-
-func (b Block) GetHash() []byte {
+func (b Block) GetHash() string {
 	return b.Hash
 }
 
-func (b Block) GetPrevHash() []byte {
+func (b Block) GetPrevHash() string {
 	return b.PrevHash
 }
 
-func (b Block) GenerateHash() []byte {
-	headers := bytes.Join([][]byte{b.PrevHash, convertIntToBytes(b.Nonce), convertIntToBytes(b.Timestamp)}, []byte{})
+func (b Block) GenerateHash() string {
+	headers := b.PrevHash + strconv.Itoa(b.Nonce) + strconv.Itoa(b.Timestamp)
+	h := sha256.New()
+	h.Write([]byte(headers))
+	hashed := h.Sum(nil)
 
-	hash := sha256.Sum256(headers)
-
-	return hash[:]
+	return hex.EncodeToString(hashed)
 }
 
 func GenerateBlock(prevHash string) (b Block) {
-	b.PrevHash = []byte(prevHash)
+	b.PrevHash = prevHash
 	b.Hash = b.GenerateHash()
 	b.Nonce = 0
 	b.Timestamp = int(time.Now().Unix())
-
-	fmt.Println(b)
 
 	return
 }
 
 func (b *Block) Mine(difficulty int) {
-	target := bytes.Repeat([]byte("0"), difficulty)
+	target := strings.Repeat("0", difficulty)
 
-	for ok := bytes.Equal(b.Hash[0:difficulty], target); !ok; {
-		fmt.Println(string(b.Hash), target)
+	for b.Hash[0:difficulty] != target {
 		b.Nonce++
 		b.Hash = b.GenerateHash()
 	}
