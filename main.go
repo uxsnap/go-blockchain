@@ -54,11 +54,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(transaction.Value, transaction.Outputs)
 
 	blockchain.AddTransaction(&block1, transaction)
 
-	// blockchain.AddBlock(block1)
+	blockchain.AddBlock(block1)
 
 	log.Printf("\nWalletA balance is: %f\n", walletA.GetBalance(&blockchain))
 	log.Printf("\nWalletB balance is: %f\n", walletB.GetBalance(&blockchain))

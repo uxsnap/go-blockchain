@@ -1,8 +1,8 @@
 package transaction
 
 import (
-	"bytes"
 	"crypto/sha256"
+	"encoding/hex"
 	"go-blockchain/keys"
 	"strconv"
 )
@@ -19,10 +19,13 @@ func CreateTransactionOutput(recipient keys.PublicKey, value float64, parentTran
 	to.Value = value
 	to.ParentTransactionId = parentTransactionId
 
-	id := bytes.Join([][]byte{[]byte(recipient.String()), []byte(strconv.Itoa(int(value))), []byte(parentTransactionId)}, []byte{})
-	hash := sha256.Sum256(id)
+	headers := recipient.String() + strconv.Itoa(int(value)) + parentTransactionId
 
-	to.Id = string(hash[:])
+	h := sha256.New()
+	h.Write([]byte(headers))
+	hashed := h.Sum(nil)
+
+	to.Id = hex.EncodeToString(hashed)
 
 	return
 }

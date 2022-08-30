@@ -117,7 +117,7 @@ func (b *Blockchain) AddTransaction(bk *block.Block, t transaction.Transaction) 
 	}
 
 	if bk.GetPrevHash() != "root" {
-		if !b.ProcessTransaction(t) {
+		if !b.ProcessTransaction(&t) {
 			log.Println("Transaction failed to process.")
 
 			return false
@@ -129,22 +129,18 @@ func (b *Blockchain) AddTransaction(bk *block.Block, t transaction.Transaction) 
 	return true
 }
 
-func (b *Blockchain) ProcessTransaction(t transaction.Transaction) bool {
+func (b *Blockchain) ProcessTransaction(t *transaction.Transaction) bool {
 	if !t.VerifySignature() {
 		log.Println("#Transaction signature failed to verify")
 		return false
 	}
 
-	log.Print("Inputs:")
-	log.Println(t.Inputs)
-
-	for _, input := range t.Inputs {
-
+	for ind, input := range t.Inputs {
 		if input == (transaction.TransactionInput{}) {
 			continue
 		}
 
-		input.UTXO = b.UTXOs[input.TransactionOutputId]
+		t.Inputs[ind].UTXO = b.UTXOs[input.TransactionOutputId]
 	}
 
 	if t.GetInputsValue() < b.MinTransaction {
@@ -153,19 +149,19 @@ func (b *Blockchain) ProcessTransaction(t transaction.Transaction) bool {
 	}
 
 	leftOver := t.GetInputsValue() - t.Value
-	t.TransactionId = string(t.CalculateHash())
+	t.TransactionId = t.CalculateHash()
 
 	t.Outputs = append(t.Outputs,
-		transaction.TransactionOutput{
-			Recipient:           t.Recipient,
-			Value:               t.Value,
-			ParentTransactionId: t.TransactionId,
-		},
-		transaction.TransactionOutput{
-			Recipient:           t.Sender,
-			Value:               leftOver,
-			ParentTransactionId: t.TransactionId,
-		},
+		transaction.CreateTransactionOutput(
+			t.Recipient,
+			t.Value,
+			t.TransactionId,
+		),
+		transaction.CreateTransactionOutput(
+			t.Sender,
+			leftOver,
+			t.TransactionId,
+		),
 	)
 
 	for _, output := range t.Outputs {
