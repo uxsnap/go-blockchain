@@ -1,10 +1,11 @@
 package blockchain
 
 import (
-	"go-blockchain/block"
-	"go-blockchain/transaction"
 	"log"
 	"strings"
+
+	"github.com/nuxxxcake/go-blockchain.git/block"
+	"github.com/nuxxxcake/go-blockchain.git/transaction"
 )
 
 type Blockchain struct {

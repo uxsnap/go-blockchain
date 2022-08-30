@@ -6,9 +6,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"go-blockchain/keys"
 	"log"
 	"math/big"
+
+	"github.com/nuxxxcake/go-blockchain.git/keys"
 )
 
 type signature struct {

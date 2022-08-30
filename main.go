@@ -1,11 +1,12 @@
 package main
 
 import (
-	"go-blockchain/block"
-	"go-blockchain/blockchain"
-	"go-blockchain/transaction"
-	"go-blockchain/wallet"
 	"log"
+
+	"github.com/nuxxxcake/go-blockchain.git/block"
+	"github.com/nuxxxcake/go-blockchain.git/blockchain"
+	"github.com/nuxxxcake/go-blockchain.git/transaction"
+	"github.com/nuxxxcake/go-blockchain.git/wallet"
 )
 
 func main() {

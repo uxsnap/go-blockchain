@@ -4,10 +4,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"go-blockchain/transaction"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/nuxxxcake/go-blockchain.git/transaction"
 )
 
 type Block struct {

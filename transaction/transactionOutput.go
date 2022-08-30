@@ -3,8 +3,9 @@ package transaction
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"go-blockchain/keys"
 	"strconv"
+
+	"github.com/nuxxxcake/go-blockchain.git/keys"
 )
 
 type TransactionOutput struct {

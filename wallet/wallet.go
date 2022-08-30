@@ -5,10 +5,11 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"errors"
-	"go-blockchain/blockchain"
-	"go-blockchain/keys"
-	"go-blockchain/transaction"
 	"log"
+
+	"github.com/nuxxxcake/go-blockchain.git/blockchain"
+	"github.com/nuxxxcake/go-blockchain.git/keys"
+	"github.com/nuxxxcake/go-blockchain.git/transaction"
 )
 
 type Wallet struct {
