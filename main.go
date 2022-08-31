@@ -62,4 +62,10 @@ func main() {
 
 	log.Printf("\nWalletA balance is: %f\n", walletA.GetBalance(&blockchain))
 	log.Printf("\nWalletB balance is: %f\n", walletB.GetBalance(&blockchain))
+
+	res := blockchain.IsChainValid()
+
+	if res {
+		log.Println("The chain is Valid")
+	}
 }

@@ -31,7 +31,7 @@ func (b Blockchain) GetChain() []block.Block {
 func (b Blockchain) IsChainValid() bool {
 	chain := b.Chain
 
-	if string(chain[0].GetPrevHash()) != "start" {
+	if string(chain[0].GetPrevHash()) != "root" {
 		return false
 	}
 
