@@ -42,13 +42,12 @@ func main() {
 	genesis := block.GenerateBlock("root")
 
 	blockchain.AddTransaction(&genesis, genesisTransaction)
+	blockchain.AddBlock(&genesis)
 
-	blockchain.AddBlock(genesis)
+	block1 := block.GenerateBlock(genesis.GetHash())
 
-	block1 := block.GenerateBlock(genesis.Hash)
-
-	log.Printf("\nWalletA balance is: %f\n", walletA.GetBalance(&blockchain))
-	log.Println("\nWalletA is Attempting to send funds (40) to WalletB...")
+	log.Printf("WalletA balance is: %f\n", walletA.GetBalance(&blockchain))
+	log.Println("WalletA is Attempting to send funds (40) to WalletB...")
 
 	transaction, err := walletA.SendFunds(&blockchain, walletB.PublicKey, 40)
 
@@ -57,15 +56,10 @@ func main() {
 	}
 
 	blockchain.AddTransaction(&block1, transaction)
+	blockchain.AddBlock(&block1)
 
-	blockchain.AddBlock(block1)
+	log.Printf("WalletA balance is: %f\n", walletA.GetBalance(&blockchain))
+	log.Printf("WalletB balance is: %f\n", walletB.GetBalance(&blockchain))
 
-	log.Printf("\nWalletA balance is: %f\n", walletA.GetBalance(&blockchain))
-	log.Printf("\nWalletB balance is: %f\n", walletB.GetBalance(&blockchain))
-
-	res := blockchain.IsChainValid()
-
-	if res {
-		log.Println("The chain is Valid")
-	}
+	blockchain.IsChainValid(&genesisTransaction)
 }

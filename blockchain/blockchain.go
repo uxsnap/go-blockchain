@@ -24,57 +24,57 @@ func CreateBlockchain() (blockchain Blockchain) {
 	return blockchain
 }
 
-func (b Blockchain) GetChain() []block.Block {
-	return b.Chain
-}
-
-func (b Blockchain) IsChainValid() bool {
-	chain := b.Chain
-
-	if string(chain[0].GetPrevHash()) != "root" {
-		return false
-	}
-
-	for i := 2; i < len(chain); i++ {
-		if isValid(&b, i, i-1) {
-			return false
+func (b *Blockchain) IsChainValid(genesisTransaction *transaction.Transaction) {
+	for i := 1; i < len(b.Chain); i++ {
+		if ok := isValid(b, genesisTransaction, i, i-1); !ok {
+			log.Println("Blockchain is Invalid")
+			return
 		}
 	}
 
-	return true
+	log.Println("Blockchain is Valid")
 }
 
-func (b *Blockchain) AddBlock(newBlock block.Block) {
+func (b *Blockchain) AddBlock(newBlock *block.Block) {
 	newBlock.Mine(b.Difficulty)
-	b.Chain = append(b.Chain, newBlock)
+
+	b.Chain = append(b.Chain, *newBlock)
 }
 
-func isValid(b *Blockchain, curBlockIndex, prevBlockIndex int) bool {
+func isValid(b *Blockchain, genesisTransaction *transaction.Transaction, curBlockIndex, prevBlockIndex int) bool {
 	curBlock := b.Chain[curBlockIndex]
 	prevBlock := b.Chain[prevBlockIndex]
 
 	tempUTXOs := make(map[string]transaction.TransactionOutput)
+	target := strings.Repeat("0", b.Difficulty)
+
+	tempUTXOs[genesisTransaction.Outputs[0].Id] = genesisTransaction.Outputs[0]
 
 	if curBlock.GetHash() != curBlock.GenerateHash() {
+		log.Println("The hash of current block is invalid ")
 		return false
 	}
 
 	if curBlock.GetPrevHash() != prevBlock.GetHash() {
+		log.Println("The prevHash of current block and the hash of the prevBlock is not equal ")
 		return false
 	}
 
-	if target := strings.Repeat("0", b.Difficulty); curBlock.GetHash()[0:b.Difficulty] != target {
+	if curBlock.GetHash()[0:b.Difficulty] != target {
+		log.Println("The curBlock hash didn't meet the target requirements")
 		return false
 	}
 
 	var tempOutput transaction.TransactionOutput
 
-	for _, currentTranscation := range curBlock.Transactions {
+	for i, currentTranscation := range curBlock.Transactions {
 		if !currentTranscation.VerifySignature() {
+			log.Println("The transaction signature is not right")
 			return false
 		}
 
 		if currentTranscation.GetInputsValue() != currentTranscation.GetOutputsValue() {
+			log.Println("The inputs value is not equal the outputs value")
 			return false
 		}
 
@@ -82,32 +82,32 @@ func isValid(b *Blockchain, curBlockIndex, prevBlockIndex int) bool {
 			tempOutput = tempUTXOs[input.TransactionOutputId]
 
 			if tempOutput == (transaction.TransactionOutput{}) {
+				log.Printf("#Lost Transaction(%d)\n", i)
 				return false
 			}
 
 			if input.UTXO.Value != tempOutput.Value {
+				log.Printf("#Transaction(%d) value is not valid\n", i)
 				return false
 			}
 
 			delete(tempUTXOs, input.TransactionOutputId)
 		}
 
-		for i, output := range currentTranscation.Outputs {
+		for _, output := range currentTranscation.Outputs {
 			tempUTXOs[output.Id] = output
+		}
 
-			if currentTranscation.Outputs[0].Recipient != currentTranscation.Recipient {
-				log.Printf("#Transaction(%d) output recipient is not who it should be\n", i)
-				return false
-			}
+		if currentTranscation.Outputs[0].Recipient != currentTranscation.Recipient {
+			log.Printf("#Transaction(%d) output recipient is not who it should be\n", i)
+			return false
+		}
 
-			if currentTranscation.Outputs[1].Recipient != currentTranscation.Sender {
-				log.Printf("#Transaction(%d) output 'change' is not sender.\n", i)
-				return false
-			}
+		if currentTranscation.Outputs[1].Recipient != currentTranscation.Sender {
+			log.Printf("#Transaction(%d) output 'change' is not sender.\n", i)
+			return false
 		}
 	}
-
-	log.Println("Blockchain is Valid")
 
 	return true
 }
